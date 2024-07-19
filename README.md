@@ -24,13 +24,13 @@ This script resolves the IP address of a given domain name. It handles domains w
 2. Navigate to the directory:
 
     ```bash
-    cd domain-to-ip-resolver
+    cd domain-ip-lookup
     ```
 
 3. Run the script:
 
     ```bash
-    python domain_to_ip.py
+    python main.py
     ```
 
 4. Enter a domain name (e.g., `example.com`) to get its IP address. Type `0` to exit the script.
