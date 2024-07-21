@@ -31,6 +31,11 @@ This Python script provides functionalities to get the IP address of a domain an
     ```bash
     pip install requests beautifulsoup4 colorama
     ```
+    **or*
+    ```
+    pip install -r requirements.txt
+    ```
+
 
 ## Usage
 
