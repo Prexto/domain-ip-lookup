@@ -1,4 +1,4 @@
-# Domain IP Lookup
+# Domain to IP Resolver
 
 This script resolves the IP address of a given domain name. It handles domains with or without the 'www.' prefix and ignores 'http://' and 'https://' prefixes.
 
@@ -7,7 +7,7 @@ This script resolves the IP address of a given domain name. It handles domains w
 - Resolves domain names to their IP addresses.
 - Handles domains with or without 'www.' prefix.
 - Ignores 'http://' and 'https://' prefixes.
-- Continues to run in a loop until '0' is entered to exit.
+- Continues to run in a loop until '3' is entered to exit.
 
 ## Requirements
 
