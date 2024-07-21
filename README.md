@@ -4,16 +4,18 @@ This Python script provides functionalities to get the IP address of a domain an
 
 ## Features
 
-- Get your own IP address.
-- Get the IP address of a specified domain.
-- Perform basic web scraping on a specified domain.
-- Get the IP address and perform web scraping on a specified domain.
+1. **Get Your Own IP Address**: Retrieve the IP address of your local machine.
+2. **Get IP Address of a Domain**: Retrieve the IP address associated with a given domain.
+3. **Scrape Basic Data from a Domain**: Extract and display the title, headings, paragraphs, links, images, and meta tags from a specified domain.
+4. **Get IP and Scrape Data**: Retrieve the IP address of a domain and perform basic web scraping.
+
 
 ## Requirements
 
 - Python 3.x
 - `requests` library
 - `beautifulsoup4` library
+- `colorama` library
 
 ## Installation
 
@@ -27,7 +29,7 @@ This Python script provides functionalities to get the IP address of a domain an
 2. Install the required libraries:
 
     ```bash
-    pip install requests beautifulsoup4
+    pip install requests beautifulsoup4 colorama
     ```
 
 ## Usage
