@@ -1,4 +1,4 @@
-# Domain IP and Data Scraper
+# Domain IP Lookup and BASIC Data Scraper
 
 This Python script provides functionalities to get the IP address of a domain and perform basic web scraping to extract detailed information from the website.
 
