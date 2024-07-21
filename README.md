@@ -57,6 +57,7 @@ Meta tags
 Get IP address and scrape data from a domain:
 
 Enter a domain name (e.g., example.com) to get its IP address and scrape data from the website.
+
 Exit:
 
 Exit the script.
