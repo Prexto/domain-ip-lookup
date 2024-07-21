@@ -81,9 +81,11 @@ def main_menu():
         print("\nMain Menu:")
         print("1. Get my own IP address")
         print("2. Get IP address of a domain")
-        print("3. Exit")
+        print("3. Scrape data from a domain")
+        print("4. Get IP address and scrape data from a domain")
+        print("5. Exit")
 
-        choice = input("Select an option (1, 2, or 3): ")
+        choice = input("Select an option (1, 2, 3, 4, or 5): ")
 
         if choice == '1':
             ip = get_own_ip()
@@ -92,6 +94,35 @@ def main_menu():
 
         elif choice == '2':
             domain = input("Enter the domain to get the IP (e.g., example.com): ")
+            domain = clean_domain(domain)
+            ip = get_ip(domain)
+            if ip:
+                print(f"The IP of {domain} is {ip}")
+
+        elif choice == '3':
+            domain = input("Enter the domain to scrape data from (e.g., example.com): ")
+            domain = clean_domain(domain)
+            data = basic_scraping(domain)
+            if data:
+                print(f"Title: {data['title']}")
+                print("Headings:")
+                for tag, texts in data['headings'].items():
+                    print(f"  {tag}: {', '.join(texts)}")
+                print("Paragraphs:")
+                for paragraph in data['paragraphs']:
+                    print(f"  {paragraph}")
+                print("Links:")
+                for link in data['links']:
+                    print(f"  {link}")
+                print("Images:")
+                for image in data['images']:
+                    print(f"  {image}")
+                print("Meta Tags:")
+                for name, content in data['metas'].items():
+                    print(f"  {name}: {content}")
+
+        elif choice == '4':
+            domain = input("Enter the domain to get the IP and scrape data from (e.g., example.com): ")
             domain = clean_domain(domain)
             ip = get_ip(domain)
             if ip:
@@ -115,12 +146,12 @@ def main_menu():
                     for name, content in data['metas'].items():
                         print(f"  {name}: {content}")
 
-        elif choice == '3':
+        elif choice == '5':
             print("Exiting...")
             break
 
         else:
-            print("Invalid option. Please choose 1, 2, or 3.")
+            print("Invalid option. Please choose 1, 2, 3, 4, or 5.")
 
 if __name__ == "__main__":
     main_menu()
