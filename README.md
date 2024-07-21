@@ -37,12 +37,36 @@ This script resolves the IP address of a given domain name. It handles domains w
 
 ## Example
 
-Enter the domain to get the IP (or 0 to exit): example.com
-The IP of www.example.com is 93.184.216.34
+1. **Get my own IP address**:
+    ```
+    Main Menu:
+    1. Get my own IP address
+    2. Get IP address of a domain
+    3. Exit
+    Select an option (1, 2, or 3): 1
+    Your IP address is 192.168.1.2
+    ```
 
-Enter the domain to get the IP (or 0 to exit): 0
-Exiting...
+2. **Get IP address of a domain**:
+    ```
+    Main Menu:
+    1. Get my own IP address
+    2. Get IP address of a domain
+    3. Exit
+    Select an option (1, 2, or 3): 2
+    Enter the domain to get the IP (e.g., example.com): example.com
+    The IP of www.example.com is 93.184.216.34
+    ```
 
+3. **Exit**:
+    ```
+    Main Menu:
+    1. Get my own IP address
+    2. Get IP address of a domain
+    3. Exit
+    Select an option (1, 2, or 3): 3
+    Exiting...
+    ```
 
 ## License
 
