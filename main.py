@@ -183,7 +183,7 @@ def main_menu():
             print(Fore.RED + "Invalid option. Please choose 1, 2, 3, 4, or 5." + Style.RESET_ALL)
 
     # Display social media links with space and color
-    print("\n" + Fore.MAGENTA + "Connect with me on X (formerly Twitter): @https://x.com/messino_james" + Style.RESET_ALL)
+    print("\n" + Fore.MAGENTA + "Connect with me on X (formerly Twitter): @messino_james" + Style.RESET_ALL)
     print(Fore.MAGENTA + "Check out my GitHub: github.com/Prexto" + Style.RESET_ALL + "\n")
 
 if __name__ == "__main__":
