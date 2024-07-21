@@ -48,6 +48,7 @@ Enter a domain name (e.g., example.com) to get its IP address.
 Scrape data from a domain:
 
 Enter a domain name (e.g., example.com) to scrape data from the website. This includes:
+
 Title
 Headings ```(<h1> to <h6>)```
 Paragraphs
