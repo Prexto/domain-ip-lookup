@@ -38,7 +38,8 @@ Run the script:
 python main.py
 ```
 
-Main Menu
+**Main Menu**
+
 Get my own IP address:
 
 This option will display your own IP address.
