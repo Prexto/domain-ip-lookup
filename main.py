@@ -1,190 +1,138 @@
 import socket
 import requests
 from bs4 import BeautifulSoup
-from colorama import Fore, Style, init
+import colorama
+from colorama import Fore, Style
 import time
-import sys
 
-# Initialize Colorama
-init(autoreset=True)
+colorama.init(autoreset=True)
 
-def clean_domain(domain):
-    if domain.startswith('http://'):
-        domain = domain[len('http://'):]
-    elif domain.startswith('https://'):
-        domain = domain[len('https://'):]
-    
-    if not domain.startswith('www.'):
-        domain = 'www.' + domain
+def get_private_ip():
+    hostname = socket.gethostname()
+    return socket.gethostbyname(hostname)
 
-    return domain
+def get_public_ip():
+    try:
+        response = requests.get("https://api.ipify.org?format=json")
+        response.raise_for_status()
+        return response.json()["ip"]
+    except requests.RequestException as e:
+        print(f"Error retrieving public IP: {e}")
+        return None
 
 def get_ip(domain):
+    domain = domain.replace('http://', '').replace('https://', '').replace('www.', '')
     try:
         ip = socket.gethostbyname(domain)
         return ip
     except socket.error as err:
-        print(Fore.RED + f"Could not get the IP for {domain}: {err}")
+        print(f"Could not obtain IP for {domain}: {err}")
         return None
 
-def get_own_ip():
+def scrape_data(domain):
     try:
-        hostname = socket.gethostname()
-        ip = socket.gethostbyname(hostname)
-        return ip
-    except socket.error as err:
-        print(Fore.RED + f"Could not get the own IP: {err}")
+        response = requests.get(f"http://{domain}")
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        data = {
+            "title": soup.title.string if soup.title else "No title found",
+            "headings": [heading.get_text().strip() for heading in soup.find_all(['h1', 'h2', 'h3'])],
+            "paragraphs": [para.get_text().strip() for para in soup.find_all('p')],
+            "links": [link.get('href') for link in soup.find_all('a', href=True)],
+            "images": [img.get('src') for img in soup.find_all('img', src=True)],
+            "meta_tags": {meta.get('name'): meta.get('content') for meta in soup.find_all('meta', attrs={'name': True, 'content': True})}
+        }
+        return data
+    except requests.RequestException as e:
+        print(f"Could not scrape the website: {e}")
         return None
 
-def basic_scraping(domain):
-    urls = [f"http://{domain}", f"https://{domain}"]
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    for url in urls:
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            title = soup.title.string if soup.title else 'No title found'
-            headings = {f'h{i}': [tag.text.strip() for tag in soup.find_all(f'h{i}')] for i in range(1, 7)}
-            paragraphs = [p.text.strip() for p in soup.find_all('p')]
-            links = [a['href'] for a in soup.find_all('a', href=True)]
-            images = [img['src'] for img in soup.find_all('img', src=True)]
-            metas = {meta.get('name', ''): meta.get('content', '') for meta in soup.find_all('meta', attrs={'name': True, 'content': True})}
-            
-            return {
-                'title': title,
-                'headings': headings,
-                'paragraphs': paragraphs,
-                'links': links,
-                'images': images,
-                'metas': metas
-            }
-        except requests.RequestException as e:
-            print(Fore.RED + f"Could not scrape the website {url}: {e}")
-        except Exception as e:
-            print(Fore.RED + f"An unexpected error occurred while scraping {url}: {e}")
-    
-    return None
+def display_ip_and_data(ip, data):
+    print(f"\n{Fore.GREEN}IP Address: {ip}\n")
+    if data:
+        print(f"{Fore.CYAN}Title: {data['title']}\n")
+        print(f"{Fore.CYAN}Headings:")
+        for heading in data['headings']:
+            print(f"  {heading}")
+        print(f"\n{Fore.CYAN}Paragraphs:")
+        for para in data['paragraphs']:
+            print(f"  {para}")
+        print(f"\n{Fore.CYAN}Links:")
+        for link in data['links']:
+            print(f"  {link}")
+        print(f"\n{Fore.CYAN}Images:")
+        for img in data['images']:
+            print(f"  {img}")
+        print(f"\n{Fore.CYAN}Meta Tags:")
+        for name, content in data['meta_tags'].items():
+            print(f"  {name}: {content}")
 
-def print_ascii_banner():
-    banner = r"""
+def display_ascii_art():
+    ascii_art = r"""
   _____  _____  ________   _________ ____  
  |  __ \|  __ \|  ____\ \ / /__   __/ __ \ 
  | |__) | |__) | |__   \ V /   | | | |  | |
  |  ___/|  _  /|  __|   > <    | | | |  | |
  | |    | | \ \| |____ / . \   | | | |__| |
  |_|    |_|  \_\______/_/ \_\  |_|  \____/ 
-                                           
-    """
-    # Print ASCII banner
-    print(Fore.MAGENTA + banner + Style.RESET_ALL)
+"""
+    print(Fore.MAGENTA + ascii_art)
+    time.sleep(0.5)
+    print(Style.RESET_ALL)
 
-def display_exiting_animation():
-    animation = ['.', '..', '...']
-    for _ in range(3):
-        for anim in animation:
-            sys.stdout.write(Fore.RED + f"Exiting{anim}" + Style.RESET_ALL + "\r")
-            sys.stdout.flush()
-            time.sleep(0.5)
-    print(Fore.RED + "Exiting..." + Style.RESET_ALL)
-
-def display_ip(ip, label):
-    print()
-    for _ in range(3):
-        sys.stdout.write(Fore.LIGHTCYAN_EX + f"{label} IP is {ip} " + "." * (3) + Style.RESET_ALL + "\r")
-        sys.stdout.flush()
-        time.sleep(0.2)
-        sys.stdout.write(Fore.LIGHTCYAN_EX + f"{label} IP is {ip}" + Style.RESET_ALL + "\r")
-        sys.stdout.flush()
-        time.sleep(0.2)
-    print(Fore.LIGHTCYAN_EX + f"{label} IP is {ip}" + Style.RESET_ALL)
-
-def main_menu():
+def main():
+    display_ascii_art()
     while True:
-        print_ascii_banner()
-        print("\n" + Fore.CYAN + "Main Menu:" + Style.RESET_ALL + "\n")  # Added a line space after Main Menu
-
-        print(Fore.YELLOW + "1. Get my own IP address" + Style.RESET_ALL)
-        print(Fore.YELLOW + "2. Get IP address of a domain" + Style.RESET_ALL)
-        print(Fore.YELLOW + "3. Scrape data from a domain" + Style.RESET_ALL)
-        print(Fore.YELLOW + "4. Get IP address and scrape data from a domain" + Style.RESET_ALL)
-        print(Fore.YELLOW + "5. Exit" + Style.RESET_ALL)
-
-        choice = input(Fore.GREEN + "Select an option (1, 2, 3, 4, or 5): " + Style.RESET_ALL)
+        print(f"\n{Fore.YELLOW}Main Menu:")
+        print("1. Get My Own IP Address")
+        print("2. Get IP Address of a Domain")
+        print("3. Scrape Data from a Domain")
+        print("4. Get IP Address and Scrape Data from a Domain")
+        print("5. Exit")
+        choice = input("Select an option (1, 2, 3, 4, or 5): ")
 
         if choice == '1':
-            ip = get_own_ip()
-            if ip:
-                display_ip(ip, "Your own")
-
+            private_ip = get_private_ip()
+            public_ip = get_public_ip()
+            print(f"\n{Fore.GREEN}Private IP: {private_ip}")
+            if public_ip:
+                print(f"{Fore.GREEN}Public IP: {public_ip}")
+            else:
+                print(f"{Fore.RED}Could not retrieve public IP.")
         elif choice == '2':
-            domain = input(Fore.CYAN + "Enter the domain to get the IP (e.g., example.com): " + Style.RESET_ALL)
-            domain = clean_domain(domain)
+            domain = input("Enter the domain to get the IP (e.g., example.com): ")
             ip = get_ip(domain)
             if ip:
-                display_ip(ip, domain)
-
+                print(f"\n{Fore.GREEN}The IP address of {domain} is {ip}")
+            else:
+                print(f"{Fore.RED}Could not retrieve IP for {domain}.")
         elif choice == '3':
-            domain = input(Fore.CYAN + "Enter the domain to scrape data from (e.g., example.com): " + Style.RESET_ALL)
-            domain = clean_domain(domain)
-            data = basic_scraping(domain)
+            domain = input("Enter the domain to scrape data from (e.g., example.com): ")
+            data = scrape_data(domain)
             if data:
-                print(Fore.GREEN + f"Title: {data['title']}" + Style.RESET_ALL)
-                print(Fore.BLUE + "Headings:" + Style.RESET_ALL)
-                for tag, texts in data['headings'].items():
-                    print(Fore.BLUE + f"  {tag}: {', '.join(texts)}" + Style.RESET_ALL)
-                print(Fore.BLUE + "Paragraphs:" + Style.RESET_ALL)
-                for paragraph in data['paragraphs']:
-                    print(Fore.BLUE + f"  {paragraph}" + Style.RESET_ALL)
-                print(Fore.BLUE + "Links:" + Style.RESET_ALL)
-                for link in data['links']:
-                    print(Fore.BLUE + f"  {link}" + Style.RESET_ALL)
-                print(Fore.BLUE + "Images:" + Style.RESET_ALL)
-                for image in data['images']:
-                    print(Fore.BLUE + f"  {image}" + Style.RESET_ALL)
-                print(Fore.BLUE + "Meta Tags:" + Style.RESET_ALL)
-                for name, content in data['metas'].items():
-                    print(Fore.BLUE + f"  {name}: {content}" + Style.RESET_ALL)
-
+                display_ip_and_data("", data)
+            else:
+                print(f"{Fore.RED}Could not scrape data for {domain}.")
         elif choice == '4':
-            domain = input(Fore.CYAN + "Enter the domain to get the IP and scrape data from (e.g., example.com): " + Style.RESET_ALL)
-            domain = clean_domain(domain)
+            domain = input("Enter the domain to get the IP and scrape data from (e.g., example.com): ")
             ip = get_ip(domain)
+            data = scrape_data(domain)
             if ip:
-                display_ip(ip, domain)
-                print()  # Add space between IP and data
-                data = basic_scraping(domain)
-                if data:
-                    print(Fore.GREEN + f"Title: {data['title']}" + Style.RESET_ALL)
-                    print(Fore.BLUE + "Headings:" + Style.RESET_ALL)
-                    for tag, texts in data['headings'].items():
-                        print(Fore.BLUE + f"  {tag}: {', '.join(texts)}" + Style.RESET_ALL)
-                    print(Fore.BLUE + "Paragraphs:" + Style.RESET_ALL)
-                    for paragraph in data['paragraphs']:
-                        print(Fore.BLUE + f"  {paragraph}" + Style.RESET_ALL)
-                    print(Fore.BLUE + "Links:" + Style.RESET_ALL)
-                    for link in data['links']:
-                        print(Fore.BLUE + f"  {link}" + Style.RESET_ALL)
-                    print(Fore.BLUE + "Images:" + Style.RESET_ALL)
-                    for image in data['images']:
-                        print(Fore.BLUE + f"  {image}" + Style.RESET_ALL)
-                    print(Fore.BLUE + "Meta Tags:" + Style.RESET_ALL)
-                    for name, content in data['metas'].items():
-                        print(Fore.BLUE + f"  {name}: {content}" + Style.RESET_ALL)
-
+                print(f"\n{Fore.GREEN}The IP address of {domain} is {ip}\n")
+            if data:
+                display_ip_and_data(ip, data)
+            else:
+                print(f"{Fore.RED}Could not retrieve IP and/or scrape data for {domain}.")
         elif choice == '5':
-            display_exiting_animation()
+            print(f"\n{Fore.YELLOW}Exiting...")
+            time.sleep(1)
             break
-
         else:
-            print(Fore.RED + "Invalid option. Please choose 1, 2, 3, 4, or 5." + Style.RESET_ALL)
+            print(f"{Fore.RED}Invalid option. Please try again.")
 
-    # Display social media links with space and color
-    print("\n" + Fore.MAGENTA + "Connect with me on X (formerly Twitter): @messino_james" + Style.RESET_ALL)
-    print(Fore.MAGENTA + "Check out my GitHub: github.com/Prexto" + Style.RESET_ALL + "\n")
+    print(f"{Fore.CYAN}\nConnect with me on X: https://x.com/messino_james")
+    print(f"{Fore.CYAN}Check out my GitHub: https://github.com/Prexto")
 
 if __name__ == "__main__":
-    main_menu()
+    main()
